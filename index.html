@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIKO AI - Asisten Cerdas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-dark: #121212;
+            --secondary-dark: #1E1E1E;
+            --primary-blue: #2563eb;
+            --secondary-blue: #1e40af;
+            --light-blue: #93c5fd;
+            --accent-blue: #1e3a8a;
+            --text-color: #FFFFFF;
+            --ai-message-bg: rgba(45, 45, 45, 0.9);
+            --user-message-bg: rgba(30, 64, 175, 0.9);
+            --gradient: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+            border-bottom: 1px solid rgba(37, 99, 235, 0.3);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--light-blue), var(--primary-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--light-blue), var(--primary-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            padding: 0.6rem;
+            border-radius: 50%;
+            border: none;
+            background: rgba(37, 99, 235, 0.2);
+            color: var(--light-blue);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(37, 99, 235, 0.3);
+            transform: rotate(30deg);
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(37, 99, 235, 0.2);
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-toggle {
+            display: none;
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 20;
+            background: rgba(37, 99, 235, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .new-chat-btn {
+            padding: 1rem;
+            border-radius: 12px;
+            border: 2px dashed var(--primary-blue);
+            background: transparent;
+            color: var(--light-blue);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .new-chat-btn:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .chat-history {
+            flex: 1;
+        }
+
+        .history-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            color: var(--light-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-item {
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .history-item:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+            transform: translateX(5px);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 1rem;
+            border-radius: 18px;
+            line-height: 1.6;
+            position: relative;
+            animation: fadeIn 0.4s ease-out;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: var(--gradient);
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message {
+            align-self: flex-start;
+            background-color: var(--ai-message-bg);
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .user-icon {
+            color: var(--light-blue);
+        }
+
+        .ai-icon {
+            color: var(--primary-blue);
+        }
+
+        .message-image {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .typing-indicator {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--ai-message-bg);
+            border-radius: 20px;
+            padding: 1rem 1.5rem;
+            position: relative;
+            align-self: flex-start;
+            gap: 6px;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--light-blue);
+            display: inline-block;
+            animation: typing 1.5s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .input-area {
+            padding: 1rem;
+            background-color: rgba(30, 30, 30, 0.8);
+            border-top: 1px solid rgba(37, 99, 235, 0.2);
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            position: relative;
+        }
+
+        .input-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #message-input {
+            padding: 1rem;
+            border-radius: 12px;
+            border: 2px solid rgba(37, 99, 235, 0.3);
+            background-color: rgba(20, 20, 20, 0.7);
+            color: var(--text-color);
+            outline: none;
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        #message-input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .upload-btn {
+            padding: 0.9rem;
+            border-radius: 12px;
+            border: none;
+            background: rgba(37, 99, 235, 0.2);
+            color: var(--light-blue);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .upload-btn:hover {
+            background: rgba(37, 99, 235, 0.3);
+            transform: translateY(-2px);
+        }
+
+        #send-button {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            background: var(--gradient);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        #send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        #send-button:active {
+            transform: translateY(0);
+        }
+
+        .image-preview {
+            max-width: 80px;
+            max-height: 80px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-connected {
+            background-color: #00cc66;
+            box-shadow: 0 0 10px #00cc66;
+        }
+
+        .status-disconnected {
+            background-color: #ff3366;
+        }
+
+        .background-upload {
+            display: none;
+        }
+
+        .background-label {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: rgba(37, 99, 235, 0.2);
+            color: var(--light-blue);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .background-label:hover {
+            background: rgba(37, 99, 235, 0.3);
+        }
+
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); opacity: 0.5; }
+            50% { transform: translateY(-5px); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        /* Responsiveness */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                z-index: 15;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+                animation: slideIn 0.3s ease;
+            }
+
+            .sidebar-toggle {
+                display: flex;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.8rem;
+            }
+
+            .logo-text {
+                font-size: 1.3rem;
+            }
+
+            .chat-messages {
+                padding: 0.8rem;
+            }
+
+            .input-area {
+                padding: 0.8rem;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            #send-button {
+                padding: 0.9rem 1.2rem;
+            }
+
+            .upload-btn, #send-button {
+                width: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-icon {
+                font-size: 1.5rem;
+            }
+
+            .logo-text {
+                font-size: 1.2rem;
+            }
+
+            .message {
+                max-width: 95%;
+                padding: 0.8rem;
+            }
+
+            .input-area {
+                gap: 8px;
+            }
+
+            #message-input {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .upload-btn, #send-button {
+                padding: 0.8rem;
+            }
+
+            .upload-btn i, #send-button i {
+                font-size: 0.9rem;
+            }
+
+            #send-button span {
+                display: none;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--secondary-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-blue);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-blue);
+        }
+
+        /* Keyboard avoidance for mobile */
+        @media (max-height: 700px) {
+            .chat-messages {
+                padding-bottom: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="sidebar-toggle" id="sidebar-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-robot logo-icon"></i>
+            <span class="logo-text">NIKO AI</span>
+        </div>
+        <div class="header-controls">
+            <button class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <div class="sidebar" id="sidebar">
+            <button class="new-chat-btn" id="new-chat-btn">
+                <i class="fas fa-plus"></i>
+                Obrolan Baru
+            </button>
+
+            <div class="chat-history">
+                <div class="history-title">
+                    <i class="fas fa-history"></i>
+                    Riwayat Obrolan
+                </div>
+
+                <div class="history-item">
+                    <i class="fas fa-comment"></i>
+                    <span>Ide untuk project AI</span>
+                </div>
+
+                <div class="history-item">
+                    <i class="fas fa-comment"></i>
+                    <span>Desain website modern</span>
+                </div>
+
+                <div class="history-item">
+                    <i class="fas fa-comment"></i>
+                    <span>Strategi pemasaran digital</span>
+                </div>
+            </div>
+
+            <input type="file" id="background-upload" class="background-upload" accept="image/*">
+            <label for="background-upload" class="background-label">
+                <i class="fas fa-image"></i>
+                Ganti Background
+            </label>
+
+            <div class="api-status">
+                <span class="status-indicator status-connected"></span>
+                <span>API Terhubung - NIKO AI</span>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="messages-container">
+                <div class="message ai-message">
+                    <div class="message-header">
+                        <i class="fas fa-robot ai-icon"></i>
+                        <span>NIKO AI</span>
+                    </div>
+                    Halo! Saya NIKO AI, asisten virtual cerdas Anda. Bagaimana saya bisa membantu Anda hari ini?
+                </div>
+            </div>
+
+            <div class="input-area">
+                <button class="upload-btn" id="upload-btn">
+                    <i class="fas fa-image"></i>
+                    <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                </button>
+                
+                <div class="input-container">
+                    <textarea id="message-input" placeholder="Ketik pesan Anda di sini..." rows="1"></textarea>
+                    <img id="image-preview" class="image-preview" alt="Preview gambar">
+                </div>
+                
+                <button id="send-button">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Kirim</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messagesContainer = document.getElementById('messages-container');
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const uploadBtn = document.getElementById('upload-btn');
+            const imageUpload = document.getElementById('image-upload');
+            const imagePreview = document.getElementById('image-preview');
+            const newChatBtn = document.getElementById('new-chat-btn');
+            const themeToggle = document.getElementById('theme-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const backgroundUpload = document.getElementById('background-upload');
+            
+            let currentChat = [];
+            let isLightTheme = false;
+
+            // Event listener untuk tombol toggle sidebar
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            // Event listener untuk menutup sidebar ketika klik di luar
+            document.addEventListener('click', function(e) {
+                if (!sidebar.contains(e.target) && e.target !== sidebarToggle && sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                }
+            });
+
+            // Event listener untuk unggah background
+            backgroundUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.body.style.background = `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${event.target.result}) no-repeat center center fixed`;
+                        document.body.style.backgroundSize = 'cover';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Event listener untuk tombol unggah gambar
+            uploadBtn.addEventListener('click', function() {
+                imageUpload.click();
+            });
+
+            // Event listener untuk perubahan file upload
+            imageUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        imagePreview.src = event.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Event listener untuk tombol obrolan baru
+            newChatBtn.addEventListener('click', function() {
+                if (messagesContainer.children.length > 1) {
+                    // Simpan obrolan saat ini ke riwayat sebelum memulai yang baru
+                    saveToHistory();
+                    
+                    // Hapus semua pesan kecuali pesan pembuka AI
+                    while (messagesContainer.children.length > 1) {
+                        messagesContainer.removeChild(messagesContainer.lastChild);
+                    }
+                    
+                    // Reset current chat dan preview gambar
+                    currentChat = [];
+                    imagePreview.style.display = 'none';
+                    imageUpload.value = '';
+                    
+                    showNotification('Obrolan baru dimulai', 'success');
+                }
+            });
+
+            // Event listener untuk toggle tema
+            themeToggle.addEventListener('click', function() {
+                isLightTheme = !isLightTheme;
+                toggleTheme();
+            });
+
+            // Fungsi untuk toggle tema
+            function toggleTheme() {
+                if (isLightTheme) {
+                    document.documentElement.style.setProperty('--primary-dark', '#f5f5f5');
+                    document.documentElement.style.setProperty('--secondary-dark', '#e0e0e0');
+                    document.documentElement.style.setProperty('--text-color', '#333333');
+                    document.documentElement.style.setProperty('--ai-message-bg', 'rgba(255, 255, 255, 0.9)');
+                    document.documentElement.style.setProperty('--user-message-bg', 'rgba(59, 130, 246, 0.9)');
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                    document.body.style.background = "linear-gradient(rgba(245, 245, 245, 0.9), rgba(245, 245, 245, 0.9)), url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed";
+                } else {
+                    document.documentElement.style.setProperty('--primary-dark', '#121212');
+                    document.documentElement.style.setProperty('--secondary-dark', '#1E1E1E');
+                    document.documentElement.style.setProperty('--text-color', '#FFFFFF');
+                    document.documentElement.style.setProperty('--ai-message-bg', 'rgba(45, 45, 45, 0.9)');
+                    document.documentElement.style.setProperty('--user-message-bg', 'rgba(30, 64, 175, 0.9)');
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                    document.body.style.background = "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed";
+                }
+            }
+
+            // Fungsi untuk menampilkan notifikasi
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.textContent = message;
+                notification.style.position = 'fixed';
+                notification.style.top = '20px';
+                notification.style.right = '20px';
+                notification.style.padding = '12px 20px';
+                notification.style.borderRadius = '8px';
+                notification.style.color = 'white';
+                notification.style.zIndex = '1000';
+                notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                notification.style.animation = 'fadeIn 0.3s ease-out';
+
+                if (type === 'success') {
+                    notification.style.background = 'linear-gradient(135deg, #00cc66, #00b359)';
+                } else {
+                    notification.style.background = 'linear-gradient(135deg, #ff3366, #e62e5c)';
+                }
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'fadeIn 0.3s ease-out reverse';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+
+            // Fungsi untuk menyimpan ke riwayat obrolan
+            function saveToHistory() {
+                if (currentChat.length > 0) {
+                    // Ambil beberapa kata pertama dari pesan pertama sebagai judul
+                    const firstMessage = currentChat[0].text;
+                    const title = firstMessage.split(' ').slice(0, 5).join(' ') + (firstMessage.split(' ').length > 5 ? '...' : '');
+                    
+                    // Buat elemen riwayat baru
+                    const historyContainer = document.querySelector('.chat-history');
+                    const historyItem = document.createElement('div');
+                    historyItem.classList.add('history-item');
+                    historyItem.innerHTML = `
+                        <i class="fas fa-comment"></i>
+                        <span>${title}</span>
+                    `;
+                    
+                    // Tambahkan di atas item pertama setelah judul
+                    const historyTitle = document.querySelector('.history-title');
+                    historyContainer.insertBefore(historyItem, historyTitle.nextSibling);
+                    
+                    // Batasi jumlah riwayat
+                    const historyItems = document.querySelectorAll('.history-item');
+                    if (historyItems.length > 10) {
+                        historyContainer.removeChild(historyItems[historyItems.length - 1]);
+                    }
+                }
+            }
+
+            // Fungsi untuk menambahkan pesan pengguna
+            function addUserMessage(message, imageUrl = null) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'user-message');
+
+                const messageHeader = document.createElement('div');
+                messageHeader.classList.add('message-header');
+                messageHeader.innerHTML = '<i class="fas fa-user user-icon"></i><span>Anda</span>';
+
+                const messageContent = document.createElement('div');
+                messageContent.textContent = message;
+
+                messageElement.appendChild(messageHeader);
+                messageElement.appendChild(messageContent);
+                
+                // Jika ada gambar, tambahkan ke pesan
+                if (imageUrl) {
+                    const imageElement = document.createElement('img');
+                    imageElement.src = imageUrl;
+                    imageElement.classList.add('message-image');
+                    messageElement.appendChild(imageElement);
+                }
+
+                messagesContainer.appendChild(messageElement);
+                scrollToBottom();
+                
+                // Simpan ke current chat
+                currentChat.push({ role: 'user', text: message, image: imageUrl });
+            }
+
+            // Fungsi untuk menambahkan pesan AI dengan efek mengetik
+            function addAIMessage(message, delay = 30) {
+                return new Promise(resolve => {
+                    const messageElement = document.createElement('div');
+                    messageElement.classList.add('message', 'ai-message');
+
+                    const messageHeader = document.createElement('div');
+                    messageHeader.classList.add('message-header');
+                    messageHeader.innerHTML = '<i class="fas fa-robot ai-icon"></i><span>NIKO AI</span>';
+
+                    messageElement.appendChild(messageHeader);
+
+                    const messageContent = document.createElement('div');
+                    messageElement.appendChild(messageContent);
+
+                    messagesContainer.appendChild(messageElement);
+
+                    // Tambah indikator mengetik
+                    const typingIndicator = document.createElement('div');
+                    typingIndicator.classList.add('typing-indicator');
+                    typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+                    messagesContainer.appendChild(typingIndicator);
+                    scrollToBottom();
+
+                    // Simulasi efek mengetik
+                    let i = 0;
+                    const interval = setInterval(() => {
+                        if (i < message.length) {
+                            messageContent.textContent += message.charAt(i);
+                            i++;
+                            scrollToBottom();
+                        } else {
+                            clearInterval(interval);
+                            messagesContainer.removeChild(typingIndicator);
+                            
+                            // Simpan ke current chat
+                            currentChat.push({ role: 'ai', text: message });
+                            
+                            resolve();
+                        }
+                    }, delay);
+                });
+            }
+
+            // Fungsi untuk scroll ke bawah
+            function scrollToBottom() {
+                setTimeout(() => {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 100);
+            }
+
+            // Event listener untuk tombol kirim
+            sendButton.addEventListener('click', sendMessage);
+
+            // Event listener untuk tekan Enter di textarea
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Auto-resize textarea
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+                scrollToBottom();
+            });
+
+            // Focus input ketika halaman dimuat
+            messageInput.focus();
+
+            // Fungsi untuk mengirim pesan
+            async function sendMessage() {
+                const message = messageInput.value.trim();
+                const imageUrl = imagePreview.style.display === 'block' ? imagePreview.src : null;
+                
+                if (message === '' && !imageUrl) return;
+
+                // Kosongkan input
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                imagePreview.style.display = 'none';
+                imageUpload.value = '';
+
+                // Tambahkan pesan pengguna ke chat
+                addUserMessage(message, imageUrl);
+
+                // Tampilkan indikator mengetik
+                const typingIndicator = document.createElement('div');
+                typingIndicator.classList.add('typing-indicator');
+                typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+                messagesContainer.appendChild(typingIndicator);
+                scrollToBottom();
+
+                try {
+                    // Menggunakan API endpoint yang disediakan - dopple
+                    const response = await fetch(`https://api.ryuu-dev.offc.my.id/ai/dopple?text=${encodeURIComponent(message)}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    // Hapus indikator mengetik
+                    messagesContainer.removeChild(typingIndicator);
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        // Asumsi response API memiliki property 'result.text' yang berisi teks
+                        // Menyesuaikan dengan struktur response dari API dopple
+                        let aiResponse = "Saya tidak bisa menemukan jawaban yang tepat.";
+                        
+                        if (data.result && data.result.text) {
+                            aiResponse = data.result.text;
+                        } else if (data.response) {
+                            aiResponse = data.response;
+                        } else if (data.message) {
+                            aiResponse = data.message;
+                        }
+                        
+                        await addAIMessage(aiResponse);
+                    } else {
+                        await addAIMessage("Maaf, terjadi kesalahan saat memproses permintaan Anda.");
+                    }
+                } catch (error) {
+                    messagesContainer.removeChild(typingIndicator);
+                    await addAIMessage("Terjadi kesalahan jaringan. Silakan coba lagi nanti.");
+                }
+            }
+
+            // Animasi untuk elemen UI
+            function animateElements() {
+                const messages = document.querySelectorAll('.message');
+                messages.forEach((message, index) => {
+                    message.style.animationDelay = `${index * 0.1}s`;
+                });
+            }
+
+            // Jalankan animasi setelah halaman dimuat
+            setTimeout(animateElements, 500);
+        });
+    </script>
+</body>
+</html>
